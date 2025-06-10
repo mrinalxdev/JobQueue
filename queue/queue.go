@@ -10,35 +10,45 @@ import (
 type Queue struct {
 	mu     sync.Mutex
 	queues map[job.Priority]*list.List
+	deadLetterQ *list.List
 }
 
-func NewQueue() *Queue {
+func NewQueue() *Queue{
 	return &Queue{
-		queues: map[job.Priority]*list.List{
-			job.High: list.New(),
-			job.Low:  list.New(),
+		queues : map[job.Priority]*list.List{
+			job.High : list.New(),
+			job.Low : list.New(),
 		},
+		deadLetterQ: list.New(),
 	}
 }
 
-func (q *Queue) Enqueue(j job.Job) {
+func (q *Queue) Enqueue(j job.Job){
 	q.mu.Lock()
 	defer q.mu.Unlock()
+
 	q.queues[j.Priority].PushBack(j)
 }
 
 func (q *Queue) Dequeue() *job.Job {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-
-	for _, p := range []job.Priority{job.High, job.Low} {
+	
+	for _, p := range []job.Priority{job.High, job.Low}{
 		queue := q.queues[p]
-		if queue.Len() > 0 {
+		if queue.Len()> 0 {
 			front := queue.Front()
 			j := front.Value.(job.Job)
 			queue.Remove(front)
 			return &j
 		}
 	}
+
 	return nil
+}
+
+func (q *Queue) PushToDeadLetter(j job.Job){
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	q.deadLetterQ.PushBack(j)
 }
