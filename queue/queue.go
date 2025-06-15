@@ -52,3 +52,14 @@ func (q *Queue) PushToDeadLetter(j job.Job){
 	defer q.mu.Unlock()
 	q.deadLetterQ.PushBack(j)
 }
+
+func (q *Queue) GetAllDeadLetters() []job.Job {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	var jobs []job.Job
+	for e := q.deadLetterQ.Front(); e != nil; e = e.Next() {
+		jobs = append(jobs, e.Value.(job.Job))
+	}
+	return jobs
+}

@@ -1,6 +1,15 @@
-APP_NAME := dag-engine
-BIN_DIR := bin
-DOCKER_IMAGE := dag-engine
-VERSION := $(shell git describe --tags --always --dirty)
-GO_FILES := $(shell find . -type f -name "*.go" -not -path "./vendor/*")
-GO_PKGS := $(shell go list ./.. | grep -v /vendor/)
+APP_NAME=job-queue-go
+
+build:
+	go build -o $(APP_NAME) main.go
+
+run:
+	go run main.go
+
+test:
+	go test ./... -v
+
+clean:
+	rm -f $(APP_NAME)
+
+.PHONY: build run test clean
