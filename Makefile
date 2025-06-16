@@ -4,7 +4,15 @@ build:
 	go build -o $(APP_NAME) main.go
 
 run:
-	go run main.go
+	go run main.go $(ARGS)
+
+shell : 
+	@echo "Starting the CLI"
+	@while true; do \
+		read -p "jobqueuecli >" LINE; \
+		if ["$$CMD" = "exit"]; then break; fi; \
+		eval "go run main.go $$LINE"; \
+	done
 
 test:
 	go test ./... -v
